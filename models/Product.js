@@ -12,9 +12,12 @@ const productSchema = new mongoose.Schema(
         'Bouquets Papillon',
         'Bouquets Anniversaire',
         'Bouquets Fiançailles',
+        'Bouquet Classique',
         'Décoration',
         'Mini Bouquet',
+        'Pipe Cleaner',
         'Soutenance',
+        'Promotion',
       ],
     },
     price:  { type: Number, required: true, min: 0 },
@@ -22,6 +25,7 @@ const productSchema = new mongoose.Schema(
     purchaseCount: { type: Number, default: 0, min: 0 },
     images: [{ type: String }],
     supplements: [{ type: String, trim: true }],
+    colors: [{ type: String, trim: true }],
   },
   { timestamps: true }
 )
