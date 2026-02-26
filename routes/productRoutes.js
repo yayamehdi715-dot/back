@@ -60,12 +60,24 @@ router.post('/', authenticateAdmin, async (req, res) => {
 // PUT modifier un produit (admin uniquement)
 router.put('/:id', authenticateAdmin, async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    )
-    if (!product) return res.status(404).json({ message: 'Produit non trouvé' })
+    const oldProduct = await Product.findById(req.params.id)
+    if (!oldProduct) return res.status(404).json({ message: 'Produit non trouvé' })
+
+    // ✅ Supprimer les images retirées de Cloudinary
+    const oldImages = oldProduct.images || []
+    const newImages = req.body.images || []
+    const removedImages = oldImages.filter((url) => !newImages.includes(url))
+
+    if (removedImages.length > 0) {
+      await Promise.all(
+        removedImages.map((url) => {
+          const publicId = getPublicId(url)
+          return publicId ? cloudinary.uploader.destroy(publicId) : Promise.resolve()
+        })
+      )
+    }
+
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
     res.json(product)
   } catch (error) {
     res.status(400).json({ message: error.message })
